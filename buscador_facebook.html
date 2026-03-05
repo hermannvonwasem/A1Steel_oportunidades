@@ -1,0 +1,1581 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buscador Facebook Grupos - Canelones</title>
+    <!-- Google Fonts añadidas para Roboto y Oswald según el CSS -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&family=Roboto:wght@400;500;700&display=swap"
+        rel="stylesheet">
+
+    <style>
+        /* =========================================
+   1. VARIABLES Y RESET GLOBAL (UI/UX PRO MAX)
+   ========================================= */
+        :root {
+            /* Colores */
+            --orange: #f26522;
+            --orange-hover: #d9531e;
+            --dark-header: #222222;
+            --dark-bg: #1a1a1a;
+            --black-footer: #111111;
+            --white: #ffffff;
+            --gray-text: #555555;
+            /* MÃ¡s legible que #aaaaaa */
+            --gray-light: #f4f4f4;
+
+            /* Sombras y Efectos */
+            --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+
+            /* Espaciado */
+            --section-padding: 80px;
+            --container-width: 1200px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', 'Helvetica', Arial, sans-serif;
+            background-color: var(--gray-light);
+            line-height: 1.6;
+            font-size: 18px;
+            /* Mejor legibilidad desktop */
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        /* =========================================
+   2. HEADER Y NAVEGACIÃ“N
+   ========================================= */
+        .top-header {
+            background: var(--dark-header);
+            padding: 5px;
+            color: var(--white);
+        }
+
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* NavegaciÃ³n Naranja */
+        .orange-nav {
+            background: var(--orange);
+            position: relative;
+            min-height: 55px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 0 50px;
+            z-index: 1000;
+        }
+
+        .orange-nav ul {
+            display: flex;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .orange-nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-family: 'Oswald', sans-serif;
+            font-size: 14px;
+            font-weight: bold;
+            padding: 0 25px;
+            display: flex;
+            align-items: center;
+            height: 55px;
+            transition: background 0.3s;
+            text-transform: uppercase;
+        }
+
+        .orange-nav ul li a:hover {
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        /* BotÃ³n Hamburguesa (MÃ³vil) */
+        .menu-toggle {
+            display: none;
+            /* Oculto en PC por defecto */
+            flex-direction: column;
+            cursor: pointer;
+            padding: 10px;
+            z-index: 1100;
+        }
+
+        .menu-toggle span {
+            width: 30px;
+            height: 3px;
+            background-color: white;
+            margin: 3px 0;
+            transition: 0.3s;
+        }
+
+        /* Capa oscura al abrir menÃº */
+        .body-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 999;
+        }
+
+        .body-overlay.active {
+            display: block;
+        }
+
+
+        /* =========================================
+   3. HERO SECTION (SLIDER)
+   ========================================= */
+        .hero {
+            position: relative;
+            height: 450px;
+            /* REDUCIDO: Antes 550px */
+            background-color: #000;
+            overflow-x: hidden;
+            display: flex;
+            /* align-items: center;  <-- BORRADO: Esto causaba las franjas si el alto fallaba */
+            scroll-behavior: smooth;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .hero::-webkit-scrollbar {
+            display: none;
+        }
+
+        .hero-slider-track {
+            display: flex;
+            height: 100%;
+            width: 100%;
+        }
+
+        .hero-slide {
+            min-width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .main-hero-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.5;
+        }
+
+        /* Flechas Slider */
+        .slider-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: white;
+            font-size: 50px;
+            cursor: pointer;
+            z-index: 30;
+            padding: 20px;
+            opacity: 0.2;
+            transition: opacity 0.3s;
+            outline: none;
+        }
+
+        .slider-arrow:hover {
+            opacity: 0.8;
+        }
+
+        .slider-arrow.prev {
+            left: 10px;
+        }
+
+        .slider-arrow.next {
+            right: 10px;
+        }
+
+        /* =========================================
+   CORRECCIÃ“N: TEXTO SOBRE LA IMAGEN
+   ========================================= */
+
+        .hero-content {
+            position: absolute;
+            /* Saca el texto del flujo normal para que flote */
+            transform: translate(-50%, -50%);
+            /* Centrado matemÃ¡tico exacto */
+            z-index: 10;
+            /* Asegura que estÃ© CAPA ARRIBA de la imagen */
+            text-align: center;
+            /* Texto centrado */
+            width: 100%;
+            /* Para que ocupe el ancho disponible */
+            max-width: 1200px;
+            /* Respetamos el ancho mÃ¡ximo de tu sitio */
+            padding: 0 20px;
+            /* Margen de seguridad para celulares */
+        }
+
+        /* MantÃ©n los estilos de H1 y P que ya tenÃas, pero asegÃºrate que estÃ©n asÃ: */
+        .hero-content h1 {
+            font-family: 'Oswald', sans-serif;
+            font-size: 48px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: white;
+            /* Aseguramos blanco */
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6);
+            /* Sombra para leer mejor sobre foto */
+            margin: 0;
+            line-height: 1.1;
+        }
+
+        .hero-content p {
+            max-width: 700px;
+            margin: 15px auto 0;
+            /* 'auto' a los lados centra el bloque del pÃ¡rrafo */
+            font-size: 20px;
+            /* Un poco mÃ¡s grande para leerse bien */
+            color: #f1f1f1;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+        }
+
+
+        .btn-hero {
+            pointer-events: auto;
+            background: var(--orange);
+            color: white;
+            text-decoration: none;
+            padding: 15px 40px;
+            font-weight: bold;
+            display: inline-block;
+            margin-top: 20px;
+        }
+
+        .hero-content {
+            position: absolute;
+            /* Saca el texto del flujo normal para que flote */
+            top: 50%;
+            /* Baja al 50% del alto */
+            left: 50%;
+            /* Se mueve al 50% del ancho */
+            transform: translate(-50%, -50%);
+            /* Centrado matemÃ¡tico exacto */
+            z-index: 10;
+            /* Asegura que estÃ© CAPA ARRIBA de la imagen */
+
+            width: 100%;
+            /* Para que ocupe el ancho disponible */
+
+
+        }
+
+        /* MantÃ©n los estilos de H1 y P que ya tenÃas, pero asegÃºrate que estÃ©n asÃ: */
+        .hero-content h1 {
+            font-family: 'Oswald', sans-serif;
+            font-size: 48px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: white;
+            /* Aseguramos blanco */
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6);
+            /* Sombra para leer mejor sobre foto */
+            margin: 0;
+            line-height: 1.1;
+        }
+
+        .hero-content span {
+            color: var(--orange);
+            /* El span dentro del H1 */
+        }
+
+        .hero-content p {
+            max-width: 700px;
+            margin: 15px auto 0;
+            /* 'auto' a los lados centra el bloque del pÃ¡rrafo */
+            font-size: 20px;
+            /* Un poco mÃ¡s grande para leerse bien */
+            color: #f1f1f1;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+        }
+
+        .contact-form .btn-hero {
+            align-self: flex-start;
+            padding: 14px 45px;
+            border-radius: 3px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .btn-hero:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+        }
+
+
+        /* =========================================
+   4. SECCIONES Y GRILLAS GENERALES
+   ========================================= */
+        /* Contenedores */
+        .container {
+            width: 90%;
+            max-width: 1100px;
+            margin: auto;
+        }
+
+        section {
+            padding: 80px 0;
+        }
+
+        /* Grilla Clara */
+        .light-grid {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .light-card {
+            background: #ffffff;
+            padding: 60px 70px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, .25);
+        }
+
+        .light-card ul {
+            padding-left: 20px;
+        }
+
+        .light-card ul li {
+            margin-bottom: 8px;
+        }
+
+        /* Secciones Adicionales (Confianza/Proceso) */
+        .confianza {
+            background: #111;
+            color: #fff;
+        }
+
+        .confianza-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 30px;
+            text-align: center;
+        }
+
+        .confianza-item strong {
+            font-size: 42px;
+            color: orange;
+            display: block;
+        }
+
+        .confianza-item span {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .pilares-seco {
+            background: #fff;
+        }
+
+        .pilares-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin-top: 50px;
+        }
+
+        .pilar {
+            background: #f9f9f9;
+            padding: 30px;
+            border-left: 5px solid orange;
+        }
+
+        .pilar h3 {
+            margin-bottom: 15px;
+            color: #111;
+        }
+
+        .proceso {
+            background: #eee;
+        }
+
+        .proceso-lista {
+            list-style: none;
+            padding: 0;
+            max-width: 600px;
+        }
+
+        .proceso-lista li {
+            padding: 12px 0;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .cierre {
+            background: #111;
+            color: #fff;
+            text-align: center;
+        }
+
+        .cierre h2 {
+            color: orange;
+        }
+
+
+        /* =========================================
+   5. FORMULARIO DE CONTACTO
+   ========================================= */
+        .contact-card {
+            max-width: 750px;
+            margin: 80px auto;
+            border-left: 6px solid var(--orange);
+            padding-left: 20px;
+            /* AÃ±adido para espaciado */
+        }
+
+        .contact-form .form-row {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 16px;
+        }
+
+        .contact-form label {
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .contact-form input,
+        .contact-form textarea,
+        .contact-form select {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 15px;
+        }
+
+        /* =========================================
+   6. GALERÃA DE OBRAS (Grid & Hover)
+   ========================================= */
+        .obras-section {
+            background-color: var(--dark-bg);
+            padding: 80px 20px;
+        }
+
+        .section-title {
+            font-family: 'Oswald', sans-serif;
+            text-transform: uppercase;
+            color: var(--orange);
+            font-size: 36px;
+            letter-spacing: 1px;
+            position: relative;
+            display: inline-block;
+        }
+
+        .section-title::after {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 4px;
+            background: var(--white);
+            margin: 15px auto 0;
+        }
+
+        .gallery-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .gallery-item {
+            position: relative;
+            display: block;
+            overflow: hidden;
+            border-radius: 4px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 280px;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+            filter: grayscale(30%);
+        }
+
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(242, 101, 34, 0.85);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: all 0.4s ease;
+        }
+
+        .overlay-text {
+            color: white;
+            font-family: 'Oswald', sans-serif;
+            text-transform: uppercase;
+            font-weight: bold;
+            font-size: 18px;
+            letter-spacing: 1px;
+            transform: translateY(20px);
+            transition: all 0.4s ease;
+        }
+
+        /* Efectos Hover */
+        .gallery-item:hover .overlay {
+            opacity: 1;
+        }
+
+        .gallery-item:hover img {
+            transform: scale(1.1);
+            filter: grayscale(0%);
+        }
+
+        .gallery-item:hover .overlay-text {
+            transform: translateY(0);
+        }
+
+
+        /* =========================================
+   7. MODAL / LIGHTBOX
+   ========================================= */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.92);
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .modal-content-wrapper {
+            position: relative;
+            max-width: 90%;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-image {
+            width: auto;
+            height: auto;
+            max-width: 100%;
+            max-height: 75vh;
+            object-fit: contain;
+            display: block;
+            border: 2px solid #333;
+        }
+
+        .modal-caption-strip {
+            background-color: var(--orange);
+            color: white;
+            text-align: center;
+            padding: 15px 20px;
+            font-family: 'Oswald', sans-serif;
+            text-transform: uppercase;
+            font-size: 18px;
+            letter-spacing: 1px;
+            width: 100%;
+            border-top: 2px solid var(--dark-header);
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 50px;
+            font-weight: bold;
+            transition: 0.3s;
+            cursor: pointer;
+            z-index: 100;
+            line-height: 0.6;
+        }
+
+        .close-modal:hover {
+            color: var(--orange);
+        }
+
+        .modal-arrow {
+            cursor: pointer;
+            position: absolute;
+            top: 50%;
+            width: auto;
+            padding: 20px;
+            margin-top: -50px;
+            color: white;
+            font-weight: bold;
+            font-size: 40px;
+            transition: 0.3s ease;
+            border-radius: 0 3px 3px 0;
+            user-select: none;
+            background: none;
+            border: none;
+            outline: none;
+            z-index: 100;
+        }
+
+        .modal-prev {
+            left: 10px;
+            border-radius: 3px 0 0 3px;
+        }
+
+        .modal-next {
+            right: 10px;
+            border-radius: 0 3px 3px 0;
+        }
+
+        .modal-arrow:hover {
+            background-color: rgba(242, 101, 34, 0.8);
+        }
+
+
+        /* CTA Banner y Footer enlaces */
+        .cta-banner {
+            background: var(--orange);
+            padding: 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+        }
+
+        .btn-outline {
+            border: 2px solid white;
+            color: white;
+            text-decoration: none;
+            padding: 12px 30px;
+            font-weight: bold;
+            background: transparent;
+        }
+
+        /* =========================================
+   FOOTER MEJORADO
+   ========================================= */
+        .main-footer {
+            background: #1b2a3a;
+            color: white;
+        }
+
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 60px 20px 40px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+        }
+
+        .footer-column h4 {
+            font-family: 'Oswald', sans-serif;
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: var(--orange);
+            text-transform: uppercase;
+        }
+
+        .footer-tagline {
+            color: #ccc;
+            font-size: 14px;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .footer-contact {
+            list-style: none;
+            padding: 0;
+        }
+
+        .footer-contact li {
+            margin-bottom: 18px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .footer-contact strong {
+            color: var(--orange);
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .footer-contact a {
+            color: white;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-contact a:hover {
+            color: var(--orange);
+        }
+
+        .footer-nav-column {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .footer-nav-column a {
+            color: white;
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.3s, padding-left 0.3s;
+            padding-left: 0;
+        }
+
+        .footer-nav-column a:hover {
+            color: var(--orange);
+            padding-left: 8px;
+        }
+
+        .footer-services {
+            list-style: none;
+            padding: 0;
+        }
+
+        .footer-services li {
+            padding: 8px 0;
+            font-size: 14px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .footer-services li:last-child {
+            border-bottom: none;
+        }
+
+        .footer-bottom {
+            background: #15202b;
+            padding: 20px;
+            text-align: center;
+            font-size: 13px;
+        }
+
+        .footer-bottom p {
+            margin: 0 0 10px 0;
+        }
+
+        .footer-legal {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .footer-legal a {
+            color: #ccc;
+            text-decoration: none;
+            font-size: 12px;
+            transition: color 0.3s;
+        }
+
+        .footer-legal a:hover {
+            color: var(--orange);
+        }
+
+        .footer-legal span {
+            color: #666;
+        }
+
+        /* Social Icons */
+        .social-icons {
+            margin-top: 15px;
+        }
+
+        .social-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 48px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            color: white;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .social-link:hover {
+            background: #1877f2;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(24, 119, 242, 0.4);
+        }
+
+        .social-link svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        /* Responsive Footer */
+        @media (max-width: 768px) {
+            .footer-container {
+                grid-template-columns: 1fr;
+                padding: 40px 20px;
+                gap: 30px;
+            }
+
+            .footer-column {
+                text-align: center;
+            }
+
+            .footer-nav-column {
+                align-items: center;
+            }
+
+            .footer-contact {
+                text-align: left;
+                display: inline-block;
+            }
+        }
+
+
+        /* --- PAGINA NOSOTROS --- */
+
+        .nosotros-hero {
+            height: 350px;
+            background: url('https://images.pexels.com/photos/1216589/pexels-photo-1216589.jpeg?auto=compress&cs=tinysrgb&w=1260') center/cover no-repeat;
+            position: relative;
+            display: flex;
+            align-items: center;
+            color: white;
+        }
+
+        .hero-overlay-dark {
+            background: rgba(0, 0, 0, 0.7);
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+        }
+
+        .nosotros-hero h1 {
+            font-family: 'Oswald', sans-serif;
+            font-size: 50px;
+            text-transform: uppercase;
+        }
+
+        .split-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+            padding: 80px 0;
+        }
+
+        .split-layout.reverse {
+            direction: ltr;
+        }
+
+        /* En desktop, intercambiamos el orden en la secciÃ³n 'reverse' */
+        .split-layout.reverse .text-block {
+            order: 2;
+        }
+
+        .split-layout.reverse .image-block {
+            order: 1;
+        }
+
+        .subtitle {
+            color: var(--orange);
+            text-transform: uppercase;
+            font-weight: bold;
+            letter-spacing: 2px;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .text-block h2 {
+            font-family: 'Oswald', sans-serif;
+            font-size: 32px;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+
+        .image-block img {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+            border-radius: 4px;
+            box-shadow: 20px 20px 0px var(--orange);
+            /* Detalle de diseÃ±o: sombra naranja sÃ³lida */
+        }
+
+        /* Banner de EstadÃsticas */
+        .stats-banner {
+            background: var(--orange);
+            color: white;
+            padding: 60px 0;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            text-align: center;
+        }
+
+        .stat-item strong {
+            display: block;
+            font-size: 48px;
+            font-family: 'Oswald', sans-serif;
+            line-height: 1;
+        }
+
+        .stat-item span {
+            text-transform: uppercase;
+            font-size: 13px;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        /* Responsive para MÃ³vil */
+        @media (max-width: 768px) {
+            .split-layout {
+                grid-template-columns: 1fr;
+                padding: 40px 0;
+                gap: 30px;
+            }
+
+            .split-layout.reverse .text-block {
+                order: 1;
+            }
+
+            .split-layout.reverse .image-block {
+                order: 2;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 30px;
+            }
+
+            .image-block img {
+                height: 250px;
+                box-shadow: 10px 10px 0px var(--orange);
+            }
+
+            .nosotros-hero h1 {
+                font-size: 32px;
+            }
+        }
+
+        /* --- SECCIÃ“N TESTIMONIOS --- */
+        .testimonios-section {
+            background-color: #eee;
+            /* Fondo gris claro para separar de la secciÃ³n anterior */
+            padding: 100px 0;
+        }
+
+        .testimonios-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
+            margin-top: 50px;
+        }
+
+        .testimonio-card {
+            background: white;
+            padding: 50px 40px 40px;
+            border-radius: 5px;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .testimonio-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 45px rgba(242, 101, 34, 0.1);
+        }
+
+        /* Comilla decorativa */
+        .quote-icon {
+            position: absolute;
+            top: -20px;
+            left: 40px;
+            background: var(--orange);
+            color: white;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            font-family: 'Oswald', sans-serif;
+            border-radius: 3px;
+        }
+
+        .testimonio-text {
+            font-style: italic;
+            color: #555;
+            margin-bottom: 25px;
+            line-height: 1.8;
+        }
+
+        .testimonio-author {
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+
+        .testimonio-author strong {
+            display: block;
+            font-family: 'Oswald', sans-serif;
+            color: var(--dark-header);
+            text-transform: uppercase;
+        }
+
+        .testimonio-author span {
+            font-size: 13px;
+            color: var(--orange);
+            font-weight: bold;
+        }
+
+        .stars {
+            margin-top: 10px;
+            color: #ffcc00;
+            /* Color dorado para las estrellas */
+            letter-spacing: 2px;
+        }
+
+        /* Ajuste mÃ³vil */
+
+        /* =========================================
+   9. MEDIA QUERIES (MÃ“VIL) - TODO AQUÃ
+   ========================================= */
+
+        @media (max-width: 600px) {
+
+
+            .testimonios-section {
+                padding: 60px 20px;
+            }
+
+            .testimonio-card {
+                padding: 40px 25px 30px;
+            }
+
+            /* Ajustes Generales */
+            .top-header,
+            .orange-nav,
+            .hero-content,
+            .light-grid {
+                padding-left: 20px !important;
+                padding-right: 20px !important;
+            }
+
+            h1 {
+                font-size: 28px !important;
+                line-height: 1.2;
+            }
+
+            .hero-content h1 {
+                font-size: 32px !important;
+            }
+
+            .hero-content p {
+                font-size: 16px;
+            }
+
+            /* NavegaciÃ³n y MenÃº Hamburguesa */
+            .orange-nav {
+                justify-content: flex-end;
+            }
+
+            .menu-toggle {
+                display: flex;
+            }
+
+            .orange-nav ul {
+                flex-direction: column;
+                position: fixed;
+                top: 0;
+                left: -100%;
+                /* Oculto */
+                width: 80%;
+                height: 100vh;
+                background-color: var(--orange);
+                transition: 0.4s ease-in-out;
+                padding-top: 60px;
+                box-shadow: 5px 0 15px rgba(0, 0, 0, 0.3);
+                z-index: 1100;
+            }
+
+            .orange-nav ul.active {
+                left: 0;
+            }
+
+            .orange-nav ul li a {
+                height: auto;
+                padding: 15px 25px;
+                font-size: 18px;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            /* Grillas a 1 Columna */
+            .confianza-grid,
+            .pilares-grid {
+                grid-template-columns: 1fr !important;
+                gap: 30px !important;
+            }
+
+            .cta-banner {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+
+            /* Tarjetas y Contenedores */
+            .light-card {
+                padding: 40px 20px !important;
+                margin: 10px 0 !important;
+            }
+
+            .contact-card {
+                margin: 30px auto !important;
+                width: 100% !important;
+                border-left-width: 4px !important;
+                padding: 0 15px;
+            }
+
+            /* Inputs MÃ³vil */
+            .form-row input,
+            .form-row textarea {
+                width: 100% !important;
+                font-size: 16px !important;
+            }
+
+            /* Slider y GalerÃa */
+            .hero {
+                height: 300px !important;
+                /* REDUCIDO: Antes 400px, ideal para mÃ³viles */
+            }
+
+            /* Ajusta el tamaÃ±o del tÃtulo en mÃ³vil para que entre bien en la nueva altura */
+            .hero-content h1 {
+                font-size: 28px !important;
+            }
+
+            .gallery-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .gallery-item img {
+                height: 220px;
+            }
+
+            /* Modal MÃ³vil */
+            .modal-caption-strip {
+                font-size: 14px;
+                padding: 10px;
+            }
+
+            .modal-arrow {
+                font-size: 30px;
+                padding: 10px;
+            }
+
+            .close-modal {
+                top: 10px;
+                right: 20px;
+                font-size: 40px;
+            }
+
+        }
+
+        /* =========================================
+   NUEVO: BOTÃ“N DE URGENCIAS 24HS
+   ========================================= */
+
+        /* Estilo principal del botÃ³n */
+        .btn-urgencias {
+            background-color: #e60000 !important;
+            /* Rojo intenso */
+            color: #ffffff !important;
+            padding: 10px 20px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-family: 'Oswald', sans-serif;
+            font-weight: bold;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 0 15px rgba(230, 0, 0, 0.4);
+            transition: all 0.3s ease;
+            animation: pulse-red 2s infinite;
+            /* AnimaciÃ³n de pulso */
+        }
+
+        .btn-urgencias:hover {
+            background-color: #ff0000 !important;
+            transform: scale(1.03);
+        }
+
+        /* Punto blanco que parpadea (efecto "en vivo") */
+        .dot {
+            height: 8px;
+            width: 8px;
+            background-color: #fff;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 10px;
+            animation: blink 1s infinite;
+        }
+
+        /* AnimaciÃ³n del resplandor rojo */
+        @keyframes pulse-red {
+            0% {
+                box-shadow: 0 0 0 0 rgba(230, 0, 0, 0.7);
+            }
+
+            70% {
+                box-shadow: 0 0 0 12px rgba(230, 0, 0, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(230, 0, 0, 0);
+            }
+        }
+
+        /* AnimaciÃ³n del parpadeo del punto */
+        @keyframes blink {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.3;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        /* Ajuste de compatibilidad para mÃ³viles */
+        @media (max-width: 600px) {
+            .header-container {
+                flex-direction: column !important;
+                /* Apila logo y botÃ³n */
+                gap: 15px;
+                padding: 15px 0;
+            }
+
+            .btn-urgencias {
+                width: 100%;
+                /* BotÃ³n ancho total en celular para que sea fÃ¡cil de tocar */
+                justify-content: center;
+            }
+        }
+
+        /* =========================================
+   MEJORAS UX MÃ“VIL (Touch Targets & Feedback)
+   ========================================= */
+
+        @media (max-width: 600px) {
+
+            /* 1. Aumentar tamaÃ±o de botones para dedos (48px mÃnimo) */
+            .btn-hero,
+            .btn-outline,
+            .btn-urgencias {
+                min-height: 48px;
+                padding: 12px 30px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 16px;
+            }
+
+            /* 2. Feedback tÃ¡ctil inmediato */
+            .orange-nav ul li a:active {
+                background: rgba(0, 0, 0, 0.2);
+                transform: scale(0.98);
+            }
+
+            .btn-hero:active,
+            .btn-outline:active {
+                transform: translateY(2px);
+                opacity: 0.9;
+            }
+
+            /* 3. Mejorar espaciado para lectura mÃ³vil */
+            section {
+                padding: 50px 0;
+                /* Menos aire que en desktop */
+            }
+
+            .hero-content {
+                padding: 0 20px;
+                /* Evitar bordes pegados */
+            }
+
+
+        }
+
+        /* =========================================
+   UI/UX IMPROVEMENTS (Global)
+   ========================================= */
+
+        section {
+            padding: var(--section-padding) 0;
+        }
+
+        /* Botones Modernos */
+        .btn-hero,
+        .btn-outline,
+        .btn-urgencias {
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: var(--shadow-md);
+            border-radius: 4px;
+            /* Suavizar esquinas */
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-hero:hover,
+        .btn-urgencias:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+            background-color: var(--orange-hover);
+        }
+
+        .btn-outline:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+            background: var(--orange);
+            color: white;
+            border-color: var(--orange);
+        }
+
+        /* TÃtulos mÃ¡s impactantes */
+        h1,
+        h2,
+        h3 {
+            color: var(--dark-header);
+            margin-bottom: 20px;
+        }
+
+        /* =========================================
+   ESTILOS COMPLEMENTARIOS PARA EL BUSCADOR
+   ========================================= */
+        .buscador-preview {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f9f9f9;
+            border: 1px dashed #ccc;
+            font-size: 14px;
+            word-break: break-all;
+            border-radius: 4px;
+            color: var(--gray-text);
+            font-family: monospace;
+        }
+
+        .btn-secondary {
+            border: 2px solid var(--orange);
+            color: var(--orange);
+            background: transparent;
+            padding: 12px 30px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: var(--transition);
+            border-radius: 4px;
+        }
+
+        .btn-secondary:hover {
+            background: var(--orange);
+            color: white;
+        }
+
+        .buttons-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Header usando las clases del CSS provisto -->
+    <header class="top-header">
+        <div class="header-container">
+            <div><strong>A1STEEL OPORTUNIDADES</strong></div>
+        </div>
+    </header>
+
+    <!-- Navegación simulada -->
+    <nav class="orange-nav">
+        <ul>
+            <li><a href="#">Inicio</a></li>
+            <li><a href="#">Buscador Facebook</a></li>
+        </ul>
+    </nav>
+
+    <!-- Sección principal que envuelve el buscador -->
+    <section>
+        <div class="container contact-card light-card" style="margin-top: 0; padding: 40px 50px; background: white;">
+
+            <h2 style="font-family: 'Oswald', sans-serif; color: var(--orange); text-transform: uppercase;">
+                Buscador de Grupos <span style="color: var(--dark-header);">Canelones</span>
+            </h2>
+
+            <div class="contact-form">
+                <div class="form-row">
+                    <label>Frase obligatoria (entre comillas)</label>
+                    <input type="text" id="frase" placeholder='Ej: "presupuesto construcción"' autocomplete="off">
+                </div>
+
+                <div class="form-row">
+                    <label>Rango de tiempo</label>
+                    <select id="tiempo">
+                        <option value="d">Últimas 24 horas</option>
+                        <option value="w">Última semana</option>
+                        <option value="m" selected>Último mes</option>
+                    </select>
+                </div>
+
+                <div class="form-row">
+                    <label>Zona de Canelones</label>
+                    <select id="zona" onchange="mostrarLocalidades()">
+                        <option value="1">Zona 1: Costa de Oro Este</option>
+                        <option value="2">Zona 2: Ciudad de la Costa / Oeste</option>
+                        <option value="3">Zona 3: Eje Ruta 5 / Industrial</option>
+                        <option value="4">Zona 4: Centro / Norte</option>
+                    </select>
+                </div>
+
+                <!-- Info de localidades -->
+                <div style="color: var(--orange); font-size: 14px; margin-top: -5px; margin-bottom: 20px; font-weight: bold;"
+                    id="infoLocalidades"></div>
+
+                <!-- Botones combinados con el estilo del CSS -->
+                <div class="buttons-group">
+                    <button class="btn-hero" onclick="generar()" style="border: none;">GENERAR BÚSQUEDA</button>
+                    <button class="btn-secondary" onclick="copiar()">COPIAR ENLACE</button>
+                    <button class="btn-secondary" onclick="abrir()">ABRIR EN GOOGLE</button>
+                </div>
+
+                <!-- Cuadro de texto para previsualización de la url -->
+                <div class="buscador-preview" id="previewQuery">La URL generada aparecerá aquí...</div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Footer rápido acorde al CSS -->
+    <footer class="main-footer">
+        <div class="footer-bottom">
+            <p>&copy; 2026 A1Steel Oportunidades. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+    <script>
+        const bloques = {
+            1: ["Atlántida", "Pinamar", "Salinas", "Parque del Plata", "La Floresta", "Costa Azul", "Cuchilla Alta", "Jaureguiberry", "Santa Ana", "San Luis"],
+            2: ["Ciudad de la Costa", "El Pinar", "Lagomar", "Barra de Carrasco", "Paso Carrasco", "Colonia Nicolich", "Villa Aeroparque", "Neptunia", "Solymar", "Shangrilá"],
+            3: ["Las Piedras", "La Paz", "Toledo", "Suárez", "Barros Blancos", "Pando", "Empalme Olmos", "Sauce", "Santa Rosa", "Progreso"],
+            4: ["Canelones", "Santa Lucía", "San Ramón", "San Bautista", "San Jacinto", "Migues", "Montes", "Tala", "Soca", "Los Cerrillos"]
+        };
+
+        let ultimaURL = "";
+
+        function mostrarLocalidades() {
+            const zona = document.getElementById("zona").value;
+            document.getElementById("infoLocalidades").innerHTML =
+                "Incluye: " + bloques[zona].join(", ");
+        }
+
+        function limpiarTexto(texto) {
+            return texto.replace(/"/g, "").trim();
+        }
+
+        function generar() {
+            const fraseInput = limpiarTexto(document.getElementById("frase").value);
+            if (!fraseInput) {
+                alert("Por favor, ingresa una frase de búsqueda.");
+                return;
+            }
+
+            const tiempo = document.getElementById("tiempo").value;
+            const zona = document.getElementById("zona").value;
+            const localidades = bloques[zona];
+
+            const frase = `"${fraseInput}"`;
+            const orLocalidades = "(" + localidades.map(l => `"${l}"`).join(" OR ") + ")";
+
+            const query = `site:facebook.com/groups ${frase} ${orLocalidades}`;
+            ultimaURL = `https://www.google.com/search?q=${encodeURIComponent(query)}&tbs=qdr:${tiempo}&num=100`;
+
+            const preview = document.getElementById("previewQuery");
+            preview.innerText = ultimaURL;
+            preview.style.color = "var(--orange)";
+            preview.style.fontWeight = "bold";
+        }
+
+        function copiar() {
+            if (!ultimaURL) {
+                alert("Primero genera la búsqueda.");
+                return;
+            }
+            navigator.clipboard.writeText(ultimaURL).then(() => {
+                alert("¡Enlace copiado al portapapeles!");
+            });
+        }
+
+        function abrir() {
+            if (!ultimaURL) {
+                alert("Primero genera la búsqueda.");
+                return;
+            }
+            window.open(ultimaURL, "_blank");
+        }
+
+        // Inicializar la vista
+        mostrarLocalidades();
+    </script>
+</body>
+
+</html>
