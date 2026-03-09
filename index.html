@@ -1458,32 +1458,38 @@
     <section>
         <div class="container contact-card light-card" style="margin-top: 0; padding: 40px 50px; background: white;">
 
-            <h2 style="font-family: 'Oswald', sans-serif; color: var(--orange); text-transform: uppercase;">
+            <h2 style="font-family: 'Oswald', sans-serif; color: var(--orange); text-transform: uppercase; margin-bottom: 10px;">
                 Buscador de Grupos <span style="color: var(--dark-header);">Canelones</span>
             </h2>
+            <p style="font-size: 16px; color: var(--gray-text); margin-bottom: 30px; line-height: 1.5;">
+                Esta herramienta te permite encontrar publicaciones recientes en grupos de compra/venta de Facebook dentro de zonas específicas de Canelones. Utiliza comandos avanzados de Google para filtrar oportunidades de negocio por palabras clave y localidad exacta.
+            </p>
 
             <div class="contact-form">
                 <div class="form-row">
-                    <label>Frase obligatoria (entre comillas)</label>
-                    <input type="text" id="frase" placeholder='Ej: "presupuesto construcción"' autocomplete="off">
+                    <label>Frase de búsqueda (Obligatoria)</label>
+                    <p style="font-size: 13px; color: #777; margin-bottom: 8px;">Define qué estás buscando exactamente. La frase se buscará de forma literal dentro de los grupos.</p>
+                    <input type="text" id="frase" placeholder='Ej: "presupuesto construcción" o "urgente techos"' autocomplete="off">
                 </div>
 
                 <div class="form-row">
                     <label>Rango de tiempo</label>
+                    <p style="font-size: 13px; color: #777; margin-bottom: 8px;">Filtra las publicaciones por su fecha de creación para encontrar solo lo más reciente.</p>
                     <select id="tiempo">
-                        <option value="d">Últimas 24 horas</option>
-                        <option value="w">Última semana</option>
-                        <option value="m" selected>Último mes</option>
+                        <option value="d">Últimas 24 horas (Para máxima urgencia)</option>
+                        <option value="w">Última semana (Novedades recientes)</option>
+                        <option value="m" selected>Último mes (Panorama general)</option>
                     </select>
                 </div>
 
                 <div class="form-row">
-                    <label>Zona de Canelones</label>
+                    <label>Zona de cobertura en Canelones</label>
+                    <p style="font-size: 13px; color: #777; margin-bottom: 8px;">Selecciona el bloque de ciudades donde quieres realizar la búsqueda.</p>
                     <select id="zona" onchange="mostrarLocalidades()">
-                        <option value="1">Zona 1: Costa de Oro Este</option>
-                        <option value="2">Zona 2: Ciudad de la Costa / Oeste</option>
-                        <option value="3">Zona 3: Eje Ruta 5 / Industrial</option>
-                        <option value="4">Zona 4: Centro / Norte</option>
+                        <option value="1">Zona 1: Costa de Oro Este (Atlántida y alrededores)</option>
+                        <option value="2">Zona 2: Ciudad de la Costa / Oeste (Pinar, Solymar, etc.)</option>
+                        <option value="3">Zona 3: Eje Ruta 5 / Industrial (Las Piedras, Pando, etc.)</option>
+                        <option value="4">Zona 4: Centro / Norte (Canelones Capital, Santa Lucía, etc.)</option>
                     </select>
                 </div>
 
